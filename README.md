@@ -1,8 +1,11 @@
-# fli-cli
+# fli-cli (BETA)
 
 > Build your own CLI in minutes using only files.
 
-`fli-cli` turns your TypeScript file structure into a fully functional CLI. Stop writing boilerplate configuration and focus on your logic.
+`fli-cli` turns your TypeScript file structure into a fully functional CLI.\
+Stop writing boilerplate configuration and focus on your logic.
+
+> fli-cli is currently in BETA. Please report any issues you may encounter.
 
 ## Requirements
 
