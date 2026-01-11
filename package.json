@@ -1,6 +1,7 @@
 {
     "name": "fli-cli",
-    "private": true,
+    "version": "0.0.1",
+    "private": false,
     "type": "module",
     "main": "dist/index.js",
     "module": "dist/index.js",
@@ -8,12 +9,16 @@
     "bin": {
         "fli-cli": "./src/cli.ts"
     },
+    "files": [
+        "dist"
+    ],
     "exports": {
         ".": "./dist/index.js"
     },
     "scripts": {
         "build": "bun build ./src/index.ts --outdir ./dist --target bun && tsc -p tsconfig.build.json",
-        "format": "prettier --write ."
+        "format": "prettier --write .",
+        "release": "bun run scripts/release.ts"
     },
     "devDependencies": {
         "@types/bun": "latest",
