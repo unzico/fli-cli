@@ -1,6 +1,7 @@
 {
     "name": "fli-cli",
     "version": "0.0.5",
+    "license": "MIT",
     "private": false,
     "repository": {
         "type": "git",
