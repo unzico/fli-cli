@@ -2,10 +2,7 @@
     "name": "mycli-example",
     "module": "index.ts",
     "type": "module",
-    "dependencies": {
-        "fli-cli": "file:../../"
-    },
     "scripts": {
-        "build": "bun run ../../src/cli.ts build ./index.ts"
+        "build": "bun run ../../dist/cli.js build ./index.ts"
     }
 }

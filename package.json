@@ -7,7 +7,7 @@
     "module": "dist/index.js",
     "types": "dist/index.d.ts",
     "bin": {
-        "fli-cli": "./src/cli.ts"
+        "fli-cli": "./dist/cli.js"
     },
     "files": [
         "dist"
@@ -16,7 +16,7 @@
         ".": "./dist/index.js"
     },
     "scripts": {
-        "build": "bun build ./src/index.ts --outdir ./dist --target bun && tsc -p tsconfig.build.json",
+        "build": "bun build ./src/index.ts ./src/cli.ts --outdir ./dist --target bun && tsc -p tsconfig.build.json",
         "format": "prettier --write .",
         "release": "bun run scripts/release.ts"
     },
