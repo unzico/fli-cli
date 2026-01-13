@@ -2,6 +2,13 @@
     "name": "fli-cli",
     "version": "0.0.4",
     "private": false,
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/unzico/fli-cli.git"
+    },
+    "bugs": {
+        "url": "https://github.com/unzico/fli-cli/issues"
+    },
     "type": "module",
     "main": "dist/index.js",
     "module": "dist/index.js",
