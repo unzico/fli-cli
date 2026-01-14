@@ -9,14 +9,6 @@ const TEST_CLI_BIN = join(FIXTURE_DIR, "test-cli");
 describe("build command", () => {
     const ENTRY_FILE = "fli.entry.ts";
 
-    beforeAll(async () => {
-        const proc = Bun.spawn(["bun", "run", "build"], {
-            cwd: import.meta.dir,
-            stdio: ["ignore", "inherit", "inherit"],
-        });
-
-        await proc.exited;
-    });
     afterAll(() => {
         if (existsSync(TEST_CLI_BIN)) {
             unlinkSync(TEST_CLI_BIN);

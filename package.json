@@ -24,6 +24,7 @@
         ".": "./dist/index.js"
     },
     "scripts": {
+        "test": "bun run build && bun test",
         "build": "bun build ./src/index.ts ./src/cli.ts --outdir ./dist --target bun && tsc -p tsconfig.build.json",
         "format": "prettier --write .",
         "release": "bun run scripts/release.ts"

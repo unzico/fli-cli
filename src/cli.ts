@@ -217,6 +217,10 @@ async function buildCLI(entryVal: string | undefined, options: { baseDir?: strin
         // Now apply the module to the targetVar command
         // 1. Default export (action)
         if (meta.hasDefault) {
+            if (meta.descriptions["default"]) {
+                setupStatements.push(`${targetVar}.description(${JSON.stringify(meta.descriptions["default"])});`);
+            }
+
             const defaultArgs = meta.arguments.find((a) => a.functionName === "default");
 
             // Configure argument
@@ -279,6 +283,11 @@ if (typeof val === "function") {
             let subCmd;
             try { subCmd = ${targetVar}.commands.find(c => c.name() === k); } catch (e) { }
             if (!subCmd) subCmd = ${targetVar}.command(k);
+
+            // Set description if available
+            if (meta_${fileCounter}.descriptions[key]) {
+                subCmd.description(meta_${fileCounter}.descriptions[key]);
+            }
 
             const argMeta = meta_${fileCounter}.arguments.find(a => a.functionName === key);
             if (argMeta && argMeta.type !== "array") {
@@ -358,10 +367,11 @@ ${setupStatements.join("\n")}
 
 function extractMetadata(fileName: string, content: string) {
     const sourceFile = ts.createSourceFile(fileName, content, ts.ScriptTarget.Latest, true);
-    const meta: { flags: any[]; arguments: any[]; hasDefault: boolean } = {
+    const meta: { flags: any[]; arguments: any[]; hasDefault: boolean; descriptions: Record<string, string> } = {
         flags: [],
         arguments: [],
         hasDefault: false,
+        descriptions: {},
     };
 
     function visit(node: ts.Node) {
@@ -369,11 +379,38 @@ function extractMetadata(fileName: string, content: string) {
             meta.hasDefault = true;
         }
         if (ts.isFunctionDeclaration(node) && node.modifiers?.some((m) => m.kind === ts.SyntaxKind.ExportKeyword)) {
-            const functionName = node.name?.text || "default";
+            let functionName = node.name?.text || "default";
 
             // Check if it's a default export
             if (node.modifiers.some((m) => m.kind === ts.SyntaxKind.DefaultKeyword)) {
                 meta.hasDefault = true;
+                functionName = "default";
+            }
+
+            // Extract Description
+            const fullText = sourceFile.getFullText();
+            const ranges = ts.getLeadingCommentRanges(fullText, node.getFullStart());
+            if (ranges && ranges.length > 0) {
+                // Use the last comment range before the node (usually the JSDoc)
+                const range = ranges[ranges.length - 1];
+                if (range) {
+                    const comment = fullText.substring(range.pos, range.end);
+                    if (comment.startsWith("/**")) {
+                        const cleanDescription = comment
+                            .replace(/^\/\*\*/, "")
+                            .replace(/\*\/$/, "")
+                            .replace(/\* /g, "")
+                            // Remove lines starting with @ (JSDoc tags)
+                            .split("\n")
+                            .map((l) => l.trim())
+                            .filter((l) => l && !l.startsWith("@") && l !== "*")
+                            .join(" ");
+
+                        if (cleanDescription) {
+                            meta.descriptions[functionName] = cleanDescription;
+                        }
+                    }
+                }
             }
 
             // Extract argument info (first parameter)
