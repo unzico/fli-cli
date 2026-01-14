@@ -33,9 +33,7 @@
         "prettier": "3.7.4"
     },
     "peerDependencies": {
-        "typescript": "5.9.3"
-    },
-    "dependencies": {
-        "commander": "14.0.2"
+        "typescript": "5.9.3",
+        "commander": "^14"
     }
 }
