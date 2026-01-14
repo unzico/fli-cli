@@ -59,11 +59,20 @@ program
 
         const debouncedBuild = debounce(triggerBuild, 200);
 
-        watch(process.cwd(), { recursive: true }, (event, filename) => {
+        const watcher = watch(process.cwd(), { recursive: true }, (_, filename) => {
             if (filename && glob.match(filename)) {
                 debouncedBuild();
             }
         });
+
+        const teardown = () => {
+            console.log("\nStopping watch mode...");
+            watcher.close();
+            process.exit(0);
+        };
+
+        process.on("SIGINT", teardown);
+        process.on("SIGTERM", teardown);
     });
 
 program.parse(process.argv);
@@ -175,7 +184,7 @@ async function buildCLI(entryVal: string | undefined, options: { baseDir?: strin
         }
 
         const fullPath = `${baseDir}/${file}`;
-        const fileVar = `mod_${fileCounter}_${cleanPath.replace(/\//g, "_")}`;
+        const fileVar = `mod_${fileCounter}_${cleanPath.replace(/[\/\.]/g, "_")}`;
         const fileContent = await Bun.file(fullPath).text();
         const meta = extractMetadata(fullPath, fileContent);
 
