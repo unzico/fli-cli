@@ -472,7 +472,7 @@ function extractMetadata(fileName: string, content: string) {
                                 .join(" ");
 
                             meta.flags.push({
-                                functionName: node.name?.text || "default",
+                                functionName,
                                 name: flagName,
                                 type: flagType,
                                 description,
