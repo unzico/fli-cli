@@ -177,14 +177,14 @@ async function buildCLI(entryVal: string | undefined, options: { baseDir?: strin
             if (!commandVars.has(currentPath)) {
                 const newVar = nextVar();
                 commandVars.set(currentPath, newVar);
-                const cmdName = part;
+                const cmdName = toKebabCase(part);
                 setupStatements.push(`const ${newVar} = ${commandVars.get(parentPath)}.command("${cmdName}");`);
             }
             parentVar = commandVars.get(currentPath)!;
         }
 
         const fullPath = `${baseDir}/${file}`;
-        const fileVar = `mod_${fileCounter}_${cleanPath.replace(/[\/\.]/g, "_")}`;
+        const fileVar = `mod_${fileCounter}_${cleanPath.replace(/[^a-zA-Z0-9]/g, "_")}`;
         const fileContent = await Bun.file(fullPath).text();
         const meta = extractMetadata(fullPath, fileContent);
 
@@ -204,7 +204,7 @@ async function buildCLI(entryVal: string | undefined, options: { baseDir?: strin
             // It's a leaf command file (e.g. "migrate.ts" inside "db")
             // We need to create a new command for it
             const name = parts[parts.length - 1];
-            const cmdName = name;
+            const cmdName = toKebabCase(name || "");
 
             // Parent is the directory command
             const parentPath = dirParts.join("/");
