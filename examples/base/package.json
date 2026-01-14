@@ -7,6 +7,8 @@
     },
     "scripts": {
         "build": "bun run ../../dist/cli.js build ./index.ts",
-        "build:cli": "bun run ../../dist/cli.js build --name cli --baseDir src"
+        "build:cli": "bun run ../../dist/cli.js build --name cli --baseDir src",
+        "watch": "bun run ../../dist/cli.js watch src/**/*.ts ./index.ts",
+        "watch:cli": "bun run ../../dist/cli.js watch src/**/*.ts --name cli --baseDir src"
     }
 }
