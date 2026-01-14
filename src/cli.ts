@@ -10,29 +10,73 @@ program
     .description("Build tool for fli-cli applications")
     .command("build [entry]")
     .description("Build the CLI into a standalone executable")
-    .action(async (entryVal = "index.ts") => {
+    .option("--baseDir <path>", "Base directory for source files")
+    .option("--name <name>", "Name of the output CLI")
+    .action(async (entryVal: string | undefined, options: { baseDir?: string; name?: string }) => {
         const cwd = process.cwd();
-        const entryPath = entryVal.startsWith("/") ? entryVal : `${cwd}/${entryVal}`;
-        console.log(`Building CLI from ${entryPath}...`);
+        const cannotMixEntryFileAndFlags = entryVal && (options.baseDir || options.name);
 
-        const module = await import(entryPath);
-        const config: FliConfig = module.default;
-
-        if (!config || !config.baseDir) {
-            console.error("Error: Default export with baseDir is required in the entry file.");
+        if (cannotMixEntryFileAndFlags) {
+            console.error("Error: Cannot use flags (--baseDir, --name) when an entry file is provided.");
+            console.error("Please either configure via the entry file OR use flags directly.");
             process.exit(1);
         }
 
-        const entryDir = entryPath.substring(0, entryPath.lastIndexOf("/"));
-        const baseDir = config.baseDir.startsWith("/") ? config.baseDir : `${entryDir}/${config.baseDir}`;
+        let config: FliConfig;
+        let entryDir: string;
+
+        if (entryVal) {
+            // MODE 1: Entry File Configuration
+            const entryPath = entryVal.startsWith("/") ? entryVal : `${cwd}/${entryVal}`;
+            console.log(`Loading configuration from ${entryPath}...`);
+
+            try {
+                const module = await import(entryPath);
+                config = module.default;
+            } catch (e) {
+                console.error(`Error loading entry file: ${entryPath}`);
+                console.error(e);
+                process.exit(1);
+            }
+
+            if (!config || !config.baseDir) {
+                console.error("Error: Default export with baseDir is required in the entry file.");
+                process.exit(1);
+            }
+
+            // In entry file mode, baseDir is relative to the entry file's directory
+            entryDir = entryPath.substring(0, entryPath.lastIndexOf("/"));
+        } else {
+            // MODE 2: Flag/Default Configuration
+            console.log("Using flag/default configuration...");
+            config = {
+                baseDir: options.baseDir || "src",
+                name: options.name || "cli",
+            };
+            // In flag mode, baseDir is relative to CWD
+            entryDir = cwd;
+        }
+
+        const baseDir = config.baseDir?.startsWith("/") ? config.baseDir : `${entryDir}/${config.baseDir}`;
+        console.log(`Building CLI '${config.name || "cli"}' from baseDir: ${baseDir}`);
 
         const files: string[] = [];
         const glob = new Bun.Glob("**/*.{ts,js}");
 
-        for await (const file of glob.scan({ cwd: baseDir })) {
-            if (!file.startsWith("_") && !file.includes("/_")) {
-                files.push(file);
+        try {
+            for await (const file of glob.scan({ cwd: baseDir })) {
+                if (!file.startsWith("_") && !file.includes("/_")) {
+                    files.push(file);
+                }
             }
+        } catch (e) {
+            console.error(`Error searching for files in ${baseDir}:`);
+            console.error(e);
+            process.exit(1);
+        }
+
+        if (files.length === 0) {
+            console.warn(`Warning: No source files found in ${baseDir}`);
         }
 
         // --- Code Generation ---
@@ -149,6 +193,7 @@ program
             }
 
             // 2. Flags from default export
+            // We need to find flags for "default"
             // We need to find flags for "default"
             const defaultFlags = meta.flags.filter(
                 (f) => f.functionName === "default" || f.functionName === "undefined",
