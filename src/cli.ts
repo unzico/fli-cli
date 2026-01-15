@@ -290,7 +290,7 @@ if (typeof val === "function") {
             }
 
             const argMeta = meta_${fileCounter}.arguments.find(a => a.functionName === key);
-            if (argMeta && argMeta.type !== "array") {
+            if (argMeta && argMeta.type !== "array" && argMeta.type !== "tuple") {
                  const argDef = argMeta.isRequired ? "<" + argMeta.name + ">" : "[" + argMeta.name + "]";
                  subCmd.argument(argDef);
             } else {
@@ -306,12 +306,27 @@ if (typeof val === "function") {
 
             subCmd.action(async (args, options) => {
                 let parsedArgs = args;
-                 if (argMeta && argMeta.type !== "array") {
-                     if (argMeta.type === "number") {
-                         parsedArgs = Number(args);
-                     } else if (argMeta.type === "boolean") {
-                         parsedArgs = (args === "true" || args === "1" || args === "on" || args === "true");
-                     }
+                 if (argMeta) {
+                    if (argMeta.type === "array" && argMeta.elementType) {
+                        if (argMeta.elementType === "number") {
+                            parsedArgs = args.map((a: string) => Number(a));
+                        } else if (argMeta.elementType === "boolean") {
+                            parsedArgs = args.map((a: string) => (a === "true" || a === "1" || a === "on"));
+                        }
+                    } else if (argMeta.type === "tuple" && argMeta.tupleTypes) {
+                        parsedArgs = args.map((a: string, i: number) => {
+                            const type = argMeta.tupleTypes[i] || "string";
+                            if (type === "number") return Number(a);
+                            if (type === "boolean") return (a === "true" || a === "1" || a === "on");
+                            return a;
+                        });
+                    } else if (argMeta.type !== "array" && argMeta.type !== "tuple") {
+                         if (argMeta.type === "number") {
+                             parsedArgs = Number(args);
+                         } else if (argMeta.type === "boolean") {
+                             parsedArgs = (args === "true" || args === "1" || args === "on" || args === "true");
+                         }
+                    }
                 }
 
                 // Coerce flags
@@ -419,19 +434,45 @@ function extractMetadata(fileName: string, content: string) {
                 const paramName = firstParam.name.getText();
                 let paramType = "string"; // default
                 let isArray = false;
+                let elementType: string | undefined;
+                let tupleTypes: string[] = [];
 
                 if (firstParam.type) {
                     if (firstParam.type.kind === ts.SyntaxKind.NumberKeyword) paramType = "number";
                     else if (firstParam.type.kind === ts.SyntaxKind.BooleanKeyword) paramType = "boolean";
-                    else if (firstParam.type.kind === ts.SyntaxKind.ArrayType || ts.isArrayTypeNode(firstParam.type)) {
+                    else if (firstParam.type.kind === ts.SyntaxKind.ArrayType) {
                         paramType = "array";
                         isArray = true;
+                        const arrayType = firstParam.type as ts.ArrayTypeNode;
+                        if (arrayType.elementType.kind === ts.SyntaxKind.NumberKeyword) elementType = "number";
+                        else if (arrayType.elementType.kind === ts.SyntaxKind.BooleanKeyword) elementType = "boolean";
+                        else elementType = "string";
+                    } else if (ts.isArrayTypeNode(firstParam.type)) {
+                        // Should be covered by SyntaxKind.ArrayType usually, but fail safe
+                        paramType = "array";
+                        isArray = true;
+                        elementType = "string";
                     } else if (
                         ts.isTypeReferenceNode(firstParam.type) &&
                         firstParam.type.typeName.getText() === "Array"
                     ) {
                         paramType = "array";
                         isArray = true;
+                        if (firstParam.type.typeArguments && firstParam.type.typeArguments.length > 0) {
+                            const arg = firstParam.type.typeArguments[0];
+                            if (arg && arg.kind === ts.SyntaxKind.NumberKeyword) elementType = "number";
+                            else if (arg && arg.kind === ts.SyntaxKind.BooleanKeyword) elementType = "boolean";
+                            else elementType = "string";
+                        } else {
+                            elementType = "string";
+                        }
+                    } else if (ts.isTupleTypeNode(firstParam.type)) {
+                        paramType = "tuple";
+                        tupleTypes = firstParam.type.elements.map((el) => {
+                            if (el.kind === ts.SyntaxKind.NumberKeyword) return "number";
+                            if (el.kind === ts.SyntaxKind.BooleanKeyword) return "boolean";
+                            return "string";
+                        });
                     }
                 }
 
@@ -441,6 +482,8 @@ function extractMetadata(fileName: string, content: string) {
                     functionName,
                     name: paramName,
                     type: paramType,
+                    elementType,
+                    tupleTypes,
                     isRequired,
                 });
             }
