@@ -127,7 +127,7 @@ async function buildCLI(entryVal: string | undefined, options: { baseDir?: strin
 
     try {
         for await (const file of glob.scan({ cwd: baseDir })) {
-            if (!file.startsWith("_") && !file.includes("/_")) {
+            if (!file.startsWith("_") && !file.includes("/_") && !file.endsWith(".d.ts")) {
                 files.push(file);
             }
         }

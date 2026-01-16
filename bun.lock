@@ -1,16 +1,15 @@
 {
   "lockfileVersion": 1,
+  "configVersion": 0,
   "workspaces": {
     "": {
       "name": "fli-cli",
-      "dependencies": {
-        "commander": "14.0.2",
-      },
       "devDependencies": {
         "@types/bun": "latest",
         "prettier": "3.7.4",
       },
       "peerDependencies": {
+        "commander": "^14",
         "typescript": "5.9.3",
       },
     },
