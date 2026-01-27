@@ -1,11 +1,11 @@
-# fli-cli (BETA)
+# crew (BETA)
 
 **Build your own CLI in minutes using only files.**
 
-`fli-cli` turns your TypeScript file structure into a fully functional CLI.
+`crew` turns your TypeScript file structure into a fully functional CLI.
 Stop writing boilerplate configuration and focus on your logic.
 
-> fli-cli is currently in BETA. Please report any issues you may encounter.
+> `crew` is currently in BETA. Please report any issues you may encounter.
 
 ## Requirements
 
@@ -17,7 +17,7 @@ This library requires [Bun](https://bun.sh) to work.
 - 🎩 **Type-Safe Options**: Define options as TypeScript types—flags are generated automatically.
 - 🛡️ **Auto-Coercion**: Arguments are automatically cast to their declared TypeScript types (numbers, booleans).
 - 📝 **Self-Documentation**: JSDoc comments automatically become CLI help text.
-- ⏱️ **Watch Mode**: Instant feedback while you develop with `fli-cli watch`.
+- ⏱️ **Watch Mode**: Instant feedback while you develop with `crew watch`.
 - ⚡ **Zero Config**: Just export a function.
 
 ## Get Started
@@ -29,13 +29,13 @@ In this guide, we'll build a simple CLI to manage users in a SQLite database.
 ```bash
 mkdir my-cli && cd my-cli
 bun init -y
-bun add fli-cli -D
-bun add commander # fli-cli depends on commander
+bun add crew -D
+bun add commander # crew depends on commander
 ```
 
 ### 2. Create your command
 
-`fli-cli` uses your file structure to create commands. Create a file at `src/create-user.ts`.
+`crew` uses your file structure to create commands. Create a file at `src/create-user.ts`.
 This will automatically become the `create-user` command.
 
 `src/create-user.ts`:
@@ -80,7 +80,7 @@ export default function main(name: string, options: UserOptions) {
 Run the build command to compile your CLI:
 
 ```bash
-bunx fli-cli build
+bunx crew build
 ```
 
 Now you can run your new CLI:
@@ -94,7 +94,7 @@ Now you can run your new CLI:
 
 ### Structure maps to Commands
 
-`fli-cli` intuitively maps your `src` directory to CLI commands.
+`crew` intuitively maps your `src` directory to CLI commands.
 
 - **Named Files** (`create.ts`) -> `mycli create`
 - **Directories** (`db/`) -> `mycli db ...`
@@ -114,14 +114,14 @@ src/
 You can use the watch command to automatically rebuild your CLI whenever you make changes:
 
 ```bash
-bunx fli-cli watch "src/**/*.ts"
+bunx crew watch "src/**/*.ts"
 ```
 
 ### Arguments & Options
 
 Simply export a function. The first argument receives command-line arguments, and the second argument defines your options.
 
-`fli-cli` is smart enough to coerce your arguments based on your TypeScript types.
+`crew` is smart enough to coerce your arguments based on your TypeScript types.
 
 `src/greet.ts`:
 
@@ -159,7 +159,7 @@ HELLO WORLD!
 
 ### Generated Help Text
 
-`fli-cli` automatically generates the help menu from your JSDoc comments:
+`crew` automatically generates the help menu from your JSDoc comments:
 
 ```bash
 $ ./cli greet --help

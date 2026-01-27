@@ -3,7 +3,7 @@
     "module": "index.ts",
     "type": "module",
     "dependencies": {
-        "fli-cli": "file:../../"
+        "crew": "file:../../"
     },
     "scripts": {
         "build": "bun run ../../dist/cli.js build ./index.ts",

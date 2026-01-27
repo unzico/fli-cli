@@ -1,4 +1,4 @@
-export type FliConfig = {
+export type Config = {
     baseDir?: string;
     name?: string;
 };

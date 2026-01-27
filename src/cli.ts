@@ -3,11 +3,11 @@ import { Command } from "commander";
 import * as ts from "typescript";
 import { watch } from "node:fs";
 import { unlink } from "node:fs/promises";
-import type { FliConfig } from "./index";
+import type { Config } from "./index";
 
 const program = new Command();
 
-program.name("fli-cli").description("Build tool for fli-cli applications");
+program.name("crew").description("Build tool for crew applications");
 
 program
     .command("build [entry]")
@@ -87,7 +87,7 @@ async function buildCLI(entryVal: string | undefined, options: { baseDir?: strin
         process.exit(1);
     }
 
-    let config: FliConfig;
+    let config: Config;
     let entryDir: string;
 
     if (entryVal) {

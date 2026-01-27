@@ -1,11 +1,11 @@
 ---
 name: write-tests
-description: Guide for writing tests using Bun's test runner for the fli-cli project, covering structure, naming, and execution patterns.
+description: Guide for writing tests using Bun's test runner for the crew project, covering structure, naming, and execution patterns.
 ---
 
 # Write Tests
 
-This skill provides guidelines and patterns for writing tests in the `fli-cli` project using the `bun:test` framework.
+This skill provides guidelines and patterns for writing tests in the `crew` project using the `bun:test` framework.
 
 ## Overview
 
